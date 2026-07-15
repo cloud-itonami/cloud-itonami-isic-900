@@ -23,8 +23,8 @@
   [{:keys [request context phase store advisor-mode] :as state}]
   (assoc state
     :venue-id (:venue-id request)
-    :operation-id (str "op-" (random-uuid))
-    :timestamp (js/Date.now)  ;; works in both clj and cljs
+    :operation-id (str "op-" (java.util.UUID/randomUUID))
+    :timestamp (System/currentTimeMillis)
     :status :intake))
 
 (defn advise

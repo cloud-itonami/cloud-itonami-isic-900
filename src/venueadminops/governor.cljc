@@ -74,7 +74,7 @@
   Scanned across the proposal's op/summary/rationale/cites/value, never
   trusting the advisor's own framing of its intent."
   ["artistic" "artistic direction" "創造的" "創作"
-   "casting" "talent selection" "キャスティング" "出演者選"
+   "casting" "talent selection" "talent" "キャスティング" "出演者選"
    "programming" "curatorial" "プログラミング" "キュレーション"
    "pricing" "ticket price" "revenue" "料金" "チケット価格" "売上"
    "creative decision" "creative-decision" "創作判断"
