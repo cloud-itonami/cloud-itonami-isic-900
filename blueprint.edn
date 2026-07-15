@@ -1,0 +1,76 @@
+{:blueprint/id "cloud-itonami-isic-900"
+ :blueprint/name "Creative Arts & Entertainment Venue Operations Coordination"
+ :blueprint/isic "900"
+ :blueprint/domain "performing-arts-venue-administration"
+ :blueprint/description
+ "LLM-driven administrative coordination for performing-arts venues and
+  production companies. Covers venue/rehearsal-space booking, performer
+  schedule coordination, supply logistics, ticketing operations, and
+  facility safety concerns. Explicitly excludes creative/artistic
+  decisions, casting, programming, pricing, and safety-authority
+  overrides."
+
+ :blueprint/scope
+ {:included ["venue-booking-scheduling"
+             "performer-schedule-coordination"
+             "supply-logistics"
+             "ticketing-operations"
+             "safety-concern-flagging"]
+  :excluded ["creative-artistic-decisions"
+             "casting-talent-selection"
+             "programming-curation"
+             "ticket-pricing"
+             "safety-authority-overrides"]}
+
+ :blueprint/operations
+ [{:op/id :schedule-venue-booking
+   :op/description "Venue/rehearsal-space booking scheduling"
+   :op/effect :propose}
+  {:op/id :coordinate-performer-schedule-proposal
+   :op/description "Administrative performer schedule coordination"
+   :op/effect :propose}
+  {:op/id :coordinate-supply-request
+   :op/description "Non-creative consumables supply coordination"
+   :op/effect :propose}
+  {:op/id :coordinate-ticketing-logistics
+   :op/description "Box-office and ticketing operational logistics"
+   :op/effect :propose}
+  {:op/id :flag-safety-concern
+   :op/description "Venue/facility safety concerns (always escalates)"
+   :op/effect :propose}]
+
+ :blueprint/governor
+ {:hard-checks
+  [{:check/id :venue-unverified
+    :check/rule "Target venue/booking must be registered AND verified"
+    :check/overridable? false}
+   {:check/id :effect-not-propose
+    :check/rule "Effect must be :propose"
+    :check/overridable? false}
+   {:check/id :scope-exclusion
+    :check/rule "No creative decisions, casting, programming, pricing, or safety-authority overrides"
+    :check/overridable? false}]
+  :escalate-ops [:flag-safety-concern]
+  :confidence-floor 0.6}
+
+ :blueprint/phases
+ [{:phase/id 0
+   :phase/name "read-only"
+   :phase/auto #{}}
+  {:phase/id 1
+   :phase/name "venue-booking + performer-schedule"
+   :phase/auto #{}}
+  {:phase/id 2
+   :phase/name "+ supply-coordination + ticketing"
+   :phase/auto #{}}
+  {:phase/id 3
+   :phase/name "auto-commit with escalation"
+   :phase/auto #{:schedule-venue-booking
+                  :coordinate-performer-schedule-proposal
+                  :coordinate-supply-request
+                  :coordinate-ticketing-logistics}
+   :phase/always-escalate #{:flag-safety-concern}}]
+
+ :blueprint/adr "ADR-2607153800"
+ :blueprint/wave "4"
+ :blueprint/status "implemented"}
