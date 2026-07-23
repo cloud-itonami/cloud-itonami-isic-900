@@ -1,7 +1,17 @@
 (ns venueadminops.operation
-  "StateGraph operation: intake → advise → govern → decide → commit | hold | escalate.
+  "The core execution engine: intake → advise → govern → decide → commit
+  | hold | escalate. NOTE: despite the state-machine framing below, this
+  is a plain `->` threading pipeline through ordinary functions -- it is
+  NOT a compiled `langgraph.graph/state-graph` (deps.edn has no langgraph
+  dependency at all). `run-operation` itself also has no direct test
+  coverage (test/venueadminops/core_test.clj only exercises the
+  store/governor/phase pieces individually, never this pipeline
+  end-to-end). A real langgraph-clj StateGraph (with `g/run*`/
+  interrupt-before human sign-off) is a known gap for this actor's
+  upgrade from :blueprint to :implemented; see e.g.
+  cloud-itonami-isco-1221's salesmgmt.actor for the target shape.
 
-  This is the core execution engine. A `request` flows through the graph:
+  A `request` flows through the pipeline:
   1. :intake — read the request, seed state
   2. :advise — ask the advisor to generate a proposal
   3. :govern — run the proposal through governor checks
@@ -16,6 +26,14 @@
             [venueadminops.governor :as governor]
             [venueadminops.phase :as phase]))
 
+;; ----------------------------- portable helpers ---
+
+#?(:clj (defn- now-ms [] (System/currentTimeMillis)))
+#?(:cljs (defn- now-ms [] (js/Date.now)))
+
+#?(:clj (defn- new-uuid [] (java.util.UUID/randomUUID)))
+#?(:cljs (defn- new-uuid [] (random-uuid)))
+
 ;; ----------------------------- State / Transitions ---
 
 (defn intake
@@ -23,8 +41,8 @@
   [{:keys [request context phase store advisor-mode] :as state}]
   (assoc state
     :venue-id (:venue-id request)
-    :operation-id (str "op-" (java.util.UUID/randomUUID))
-    :timestamp (System/currentTimeMillis)
+    :operation-id (str "op-" (new-uuid))
+    :timestamp (now-ms)
     :status :intake))
 
 (defn advise

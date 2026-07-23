@@ -7,7 +7,10 @@
  {:test {:extra-paths ["test"]
          :main-opts ["-e" "(require 'clojure.test) (require 'venueadminops.core-test) (clojure.test/run-tests 'venueadminops.core-test)"]}
 
-  :lint {:main-opts ["-e" "(println \"Linting would require clj-kondo; skipping for now\")"]}
+  :lint {:replace-deps {clj-kondo/clj-kondo {:mvn/version "2024.11.14"}}
+         :main-opts    ["-m" "clj-kondo.main"
+                        "--lint" "src" "test"
+                        "--fail-level" "error"]}
 
   :run {:main-opts ["-m" "venueadminops.sim"]}
 
