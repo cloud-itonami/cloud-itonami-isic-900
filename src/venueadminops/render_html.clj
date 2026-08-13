@@ -323,7 +323,7 @@
           (str "<span class=\"num\">" (esc (:confidence g)) "</span>")
           (str/join " &middot; "
                     (cond-> []
-                      always? (conj (str "op is in <code>always-escalate-ops</code>"))
+                      always? (conj "op is in <code>always-escalate-ops</code>")
                       low?    (conj (str "confidence &lt; floor <span class=\"num\">"
                                          (esc governor/confidence-floor) "</span>"))))
           "<span class=\"warn\">yes &mdash; awaits human sign-off</span>"))))
