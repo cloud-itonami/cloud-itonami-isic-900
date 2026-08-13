@@ -86,6 +86,108 @@
 
 (defn out-of-scope-test-advisor [] (->OutOfScopeTestAdvisor))
 
+;; ----------------------------- Governor-Probe Test Advisor
+;; Same role as `OutOfScopeTestAdvisor` above -- a deliberate test double, not
+;; a production advisor -- but aimed at the governor/phase behaviours the two
+;; shipped advisors cannot reach through `venueadminops.operation/run-operation`:
+;;
+;;   * `MockAdvisor` only ever emits `:schedule-venue-booking` with
+;;     `:effect :propose` and confidence 0.85, so three of the five ops on the
+;;     governor's closed allowlist, the `:effect-not-propose` HARD check and
+;;     both SOFT escalation gates were unreachable end-to-end.
+;;   * `OutOfScopeTestAdvisor` only ever emits scope-excluded drafts.
+;;
+;; Every field it emits is copied from the request (which the caller builds out
+;; of the seeded store) -- it invents no venue, booking, date or capacity of its
+;; own. Used by `venueadminops.render-html` to drive the operator console.
+
+(defrecord GovernorProbeAdvisor []
+  Advisor
+  (propose [_ request _context _store]
+    (let [venue-id (:venue-id request)
+          cites (if-let [b (:booking-id request)] [b] [])
+          booked (select-keys request [:event-name :date])]
+      (case (:test-scenario request)
+        ;; HARD check #2: a draft that claims direct actuation instead of a
+        ;; mere proposal. Everything else about it is clean.
+        :rogue-effect
+        {:op :schedule-venue-booking
+         :venue-id venue-id
+         :summary (str "Book " (:event-name request) " at " venue-id)
+         :rationale "Standard venue booking coordination"
+         :cites cites
+         :value booked
+         :effect :commit
+         :confidence 0.9}
+
+        ;; SOFT gate: `:flag-safety-concern` always escalates to a human, no
+        ;; matter how confident or otherwise-clean the draft is.
+        :safety-concern
+        {:op :flag-safety-concern
+         :venue-id venue-id
+         :summary (str "Rigging hazard on the main stage at " venue-id
+                       " -- crowd-safety concern raised for human review")
+         :rationale "Back-office coordination may raise a hazard, never adjudicate it"
+         :cites cites
+         :value (select-keys request [:capacity])
+         :effect :propose
+         :confidence 0.95}
+
+        ;; SOFT gate: confidence below `governor/confidence-floor`.
+        :low-confidence
+        {:op :schedule-venue-booking
+         :venue-id venue-id
+         :summary (str "Tentative date for " (:event-name request) " at " venue-id)
+         :rationale "Room-turnaround estimates in the request disagree"
+         :cites cites
+         :value booked
+         :effect :propose
+         :confidence 0.4}
+
+        ;; Clean drafts for the three allowlisted ops `MockAdvisor` never emits.
+        :clean-supply
+        {:op :coordinate-supply-request
+         :venue-id venue-id
+         :summary (str "Restock front-of-house consumables for " venue-id)
+         :rationale "Administrative consumables supply coordination"
+         :cites cites
+         :value (select-keys request [:capacity])
+         :effect :propose
+         :confidence 0.88}
+
+        :clean-ticketing
+        {:op :coordinate-ticketing-logistics
+         :venue-id venue-id
+         :summary (str "Will-call desk staffing and gate-scanner allocation for "
+                       (:event-name request))
+         :rationale "Box-office logistics only -- desk staffing and scanner allocation"
+         :cites cites
+         :value (select-keys request [:capacity :date])
+         :effect :propose
+         :confidence 0.82}
+
+        :clean-performer-schedule
+        {:op :coordinate-performer-schedule-proposal
+         :venue-id venue-id
+         :summary (str "Rehearsal call-time coordination for " (:event-name request))
+         :rationale "Administrative schedule coordination for performers already engaged"
+         :cites cites
+         :value booked
+         :effect :propose
+         :confidence 0.87}
+
+        ;; default: a clean booking draft, same shape as MockAdvisor's
+        {:op :schedule-venue-booking
+         :venue-id venue-id
+         :summary (str "Schedule " (:event-name request) " at " venue-id)
+         :rationale "Standard venue booking coordination"
+         :cites cites
+         :value booked
+         :effect :propose
+         :confidence 0.85}))))
+
+(defn governor-probe-advisor [] (->GovernorProbeAdvisor))
+
 ;; ----------------------------- DefaultAdvisor
 
 (defn advisor
@@ -95,4 +197,5 @@
   (case mode
     :mock (mock-advisor)
     :test-out-of-scope (out-of-scope-test-advisor)
+    :test-governor-probe (governor-probe-advisor)
     (mock-advisor)))  ;; default to mock

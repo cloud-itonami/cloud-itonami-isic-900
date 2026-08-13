@@ -1,7 +1,15 @@
 {:paths ["src" "test"]
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        org.clojure/clojurescript {:mvn/version "1.10.773"}}
+        org.clojure/clojurescript {:mvn/version "1.10.773"}
+        ;; デジタル庁デザインシステム (DADS) — the workspace's base design
+        ;; system (com-junkawasaki/root CLAUDE.md, 2026-08-05). Consumed as a
+        ;; git dep (not :local/root) so a standalone fork of this repo still
+        ;; resolves it. Only `render-html` uses it; the actor itself is
+        ;; dependency-free and stays portable .cljc.
+        io.github.kotoba-lang/jp-go-digital-design-system
+        {:git/url "https://github.com/kotoba-lang/jp-go-digital-design-system"
+         :git/sha "83db99546eabc53613ae826ea41d1533a3c574af"}}
 
  :aliases
  {:test {:extra-paths ["test"]
@@ -13,6 +21,18 @@
                         "--fail-level" "error"]}
 
   :run {:main-opts ["-m" "venueadminops.sim"]}
+
+  ;; Fleet-standard offline-dev alias. Sibling cloud-itonami actors use it to
+  ;; pin transitive langchain/langgraph to the local monorepo checkout; this
+  ;; actor has neither dependency (its pipeline is plain `->` threading, see
+  ;; `venueadminops.operation`), so there is nothing to override. It is kept
+  ;; so the fleet-standard `clojure -M:dev:render-html` works here too.
+  :dev {}
+
+  ;; clojure -M:dev:render-html [out-file]
+  ;;   -> regenerate docs/samples/operator-console.html by RUNNING the actor.
+  ;;      Fails the build if the run produces zero HARD governor holds.
+  :render-html {:main-opts ["-m" "venueadminops.render-html"]}
 
   :nbb {:deps {applied-science/js {:git/url "https://github.com/applied-science/js.git"
                                    :git/sha "9d5a9e8b5d4e"
