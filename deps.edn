@@ -1,6 +1,11 @@
 {:paths ["src" "test"]
 
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+ :deps {
+        ;; kotoba.lang.text, not clojure.string. Pinned as an explicit floor:
+        ;; tools.deps takes the NEWEST sha it is shown, so without a floor here
+        ;; this repo silently rides whatever a sibling happens to name.
+        io.github.kotoba-lang/text {:git/sha "73bdb13ae7a3d004b44bca08be03a3191157a38f"}
+       org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/clojurescript {:mvn/version "1.10.773"}
         ;; デジタル庁デザインシステム (DADS) — the workspace's base design
         ;; system (com-junkawasaki/root CLAUDE.md, 2026-08-05). Consumed as a
