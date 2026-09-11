@@ -20,7 +20,7 @@ By participating in this project you agree to abide by its terms.
 Before submitting a PR, ensure all tests pass:
 
 ```bash
-clojure -M:test
+kbb -M:test
 ```
 
 ## Linting
@@ -28,7 +28,7 @@ clojure -M:test
 Run the linter to check code style:
 
 ```bash
-clojure -M:lint
+kbb -M:lint
 ```
 
 ## Reporting Issues

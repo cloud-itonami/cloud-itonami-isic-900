@@ -29,7 +29,7 @@
   `:timestamp` (wall clock). Both are disclosed in the retention table
   instead of being silently dropped.
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
          (default `docs/samples/operator-console.html`)"
   (:require [kotoba.lang.text :as str]
             [jp-go-dds.skin :as skin]
@@ -461,7 +461,7 @@
      "<p><span class=\"badge\">read-only sample</span> <span class=\"badge\">governor-gated</span> "
      "<span class=\"badge\">generated from a real actor run</span></p>\n"
      "<p class=\"subtitle\">Generated at build time by <code>venueadminops.render-html</code> "
-     "(<code>clojure -M:dev:render-html</code>) by running "
+     "(<code>kbb -M:dev:render-html</code>) by running "
      "<code>venueadminops.operation/run-operation</code> "
      (count runs) " times against one fresh <code>venueadminops.store/seed-db</code>. "
      "Every venue, booking, event name, date and capacity below is read back out of that store; "
@@ -572,7 +572,7 @@
 
      "</main>\n"
      "<footer>\n"
-     "<p>Regenerate: <code>clojure -M:dev:render-html [out-file]</code>. Deterministic &mdash; "
+     "<p>Regenerate: <code>kbb -M:dev:render-html [out-file]</code>. Deterministic &mdash; "
      "byte-identical across reruns against the same seed. <code>:operation-id</code> (random UUID) "
      "and <code>:timestamp</code> (wall clock) are deliberately withheld from the page rather than "
      "silently dropped; see the retention table.</p>\n"
