@@ -34,7 +34,7 @@ Security-critical checks are tested directly in the test suite. All contribution
 that touch the governor or hard checks must include corresponding test coverage.
 
 ```bash
-clojure -M:test
+kbb -M:test
 ```
 
 ## Dependencies
