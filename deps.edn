@@ -8,7 +8,7 @@
        org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/clojurescript {:mvn/version "1.10.773"}
         ;; デジタル庁デザインシステム (DADS) — the workspace's base design
-        ;; system (com-junkawasaki/root CLAUDE.md, 2026-08-05). Consumed as a
+        ;; system (com-junkawasaki/root AGENTS.md, 2026-08-05). Consumed as a
         ;; git dep (not :local/root) so a standalone fork of this repo still
         ;; resolves it. Only `render-html` uses it; the actor itself is
         ;; dependency-free and stays portable .cljc.
